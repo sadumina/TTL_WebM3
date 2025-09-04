@@ -3,34 +3,37 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>VoiceOver App — TTS → MP3 (No Mic)</title>
+  <title>EchoCraft Studio — TTS → MP3 (No Mic)</title>
   <link rel="stylesheet" href="styles.css" />
-  <!-- (Optional) If you also download ffmpeg.min.js locally, you may load it here:
-       <script defer src="ffmpeg.min.js"></script>
-       Otherwise, app.js loads the UMD from CDN with a fallback. -->
+  <!-- Tip: serve over http(s), not file://, so recording/FFmpeg works consistently -->
 </head>
 <body>
   <header class="container">
-    <h1>🎙️ VoiceOver App</h1>
-    <p class="muted">Paste text → pick voice → speak → <strong>download audio (WebM/MP3)</strong> — no mic needed.</p>
+    <h1 class="brand">EchoCraft Studio</h1>
+    <p id="tagline" class="muted">Turn your words into lasting echoes.</p>
   </header>
 
   <main class="container">
+    <!-- TTS -->
     <section class="card">
-      <h2>1 Text to Speech</h2>
+      <div class="card-head">
+        <h2>1) Text to Speech</h2>
+        <span class="badge">Web Speech API</span>
+      </div>
 
       <label for="text">Text</label>
-      <textarea id="text" placeholder="Paste your script here..." rows="6"></textarea>
+      <textarea id="text" placeholder="Paste your script here..." rows="8"></textarea>
 
       <div class="grid">
         <div class="field">
-          <label for="langFilter">Filter voices by language (ex: en, si-LK, ta, ko)</label>
-          <input id="langFilter" placeholder="e.g. en, si-LK, ta-IN, ko-KR" />
+          <label for="langFilter">Filter voices by language (e.g. en, si-LK, ta-IN, ko-KR)</label>
+          <input id="langFilter" type="text" placeholder="en, si-LK, ta-IN, ko-KR" />
+          <p class="hint">Tip: type a code like <code>en</code> or <code>si-LK</code> to narrow the list.</p>
         </div>
 
         <div class="field">
           <label for="voiceSelect">Voice</label>
-          <select id="voiceSelect"></select>
+          <select id="voiceSelect" aria-label="Voice selection"></select>
         </div>
       </div>
 
@@ -49,44 +52,79 @@
         </div>
       </div>
 
-      <div class="row">
-        <button id="btnSpeak" class="primary">▶ Speak</button>
-        <button id="btnPause" class="ghost">⏸ Pause</button>
-        <button id="btnResume" class="ghost">⏯ Resume</button>
-        <button id="btnStop" class="danger">■ Stop</button>
+      <div class="row buttons">
+        <button id="btnSpeak" class="primary" title="Speak">▶ Speak</button>
+        <button id="btnPause" class="ghost"  title="Pause">⏸ Pause</button>
+        <button id="btnResume" class="ghost" title="Resume">⏯ Resume</button>
+        <button id="btnStop" class="danger"  title="Stop">■ Stop</button>
       </div>
 
-      <p id="speakStatus" class="muted">Ready.</p>
+      <p id="speakStatus" class="muted status">Ready.</p>
     </section>
 
+    <!-- Recording -->
     <section class="card">
-      <h2>2) Record the Tab Audio (no mic)</h2>
-      <p class="muted">When asked, choose <strong>This Tab</strong> and tick <strong>Share tab audio</strong>. We record <em>only</em> the voice from this page, not your microphone.</p>
+      <div class="card-head">
+        <h2>2) Record This Tab’s Audio (no mic)</h2>
+        <span class="badge alt">FFmpeg-WASM</span>
+      </div>
+      <p class="muted">
+        When prompted, choose <strong>This Tab</strong> and tick <strong>Share tab audio</strong>.
+        Only the speech audio from this page is captured — not your microphone.
+      </p>
 
       <div class="row">
         <label class="switch">
           <input type="checkbox" id="autoRecord" checked />
-          <span>Auto-record while speaking</span>
+          <span class="slider"></span>
+          <span class="switch-label">Auto-record while speaking</span>
         </label>
       </div>
 
-      <div class="row">
-        <button id="btnStartRec" class="secondary">● Start Recording (tab audio)</button>
-        <button id="btnStopRec" class="danger" disabled>■ Stop</button>
-        <button id="btnDownloadWebM" class="ghost" disabled>⬇ Download Audio (WebM)</button>
-        <button id="btnConvertMp3" class="ghost" disabled>♫ Convert to MP3</button>
+      <div class="row buttons">
+        <button id="btnStartRec" class="secondary" title="Start recording tab audio">● Start Recording</button>
+        <button id="btnStopRec" class="danger" disabled title="Stop recording">■ Stop</button>
+        <button id="btnDownloadWebM" class="ghost" disabled title="Download WebM audio">⬇ WebM</button>
+        <button id="btnConvertMp3" class="ghost" disabled title="Convert to MP3 in browser">♫ MP3</button>
       </div>
 
-      <p id="recStatus" class="muted">Not recording.</p>
+      <p id="recStatus" class="muted status">Not recording.</p>
       <div id="downloads" class="downloads"></div>
-      <!-- Diagnostics block will appear under here -->
+      <!-- Diagnostics block will be injected below by app.js -->
     </section>
   </main>
 
   <footer class="container muted small">
-    <p>Notes: Voices come from your OS/Browser (Web Speech API). MP3 conversion uses FFmpeg-WASM locally in your browser.</p>
+    <p>
+      © 2025 EchoCraft Studio. Voices come from your OS/Browser via the Web Speech API.
+      MP3 conversion runs locally with FFmpeg-WASM.
+    </p>
+    <p>
+      <a href="#" rel="noopener">Docs</a> ·
+      <a href="#" rel="noopener">GitHub</a> ·
+      <a href="#" rel="noopener">Contact</a>
+    </p>
   </footer>
 
   <script src="app.js"></script>
+  <script>
+    // Rotating professional quotes under the brand
+    const quotes = [
+      "Turn your words into lasting echoes.",
+      "Voices deserve to be remembered.",
+      "From script to sound, in one click.",
+      "Create. Speak. Download. Share."
+    ];
+    let i = 0;
+    const el = document.getElementById("tagline");
+    setInterval(() => {
+      i = (i + 1) % quotes.length;
+      el.classList.add("fade-out");
+      setTimeout(() => {
+        el.textContent = quotes[i];
+        el.classList.remove("fade-out");
+      }, 240);
+    }, 3800);
+  </script>
 </body>
 </html>
