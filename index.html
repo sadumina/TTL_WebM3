@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>VoiceOver App — TTS → MP3 (No Mic)</title>
+  <link rel="stylesheet" href="styles.css" />
+  <!-- (Optional) If you also download ffmpeg.min.js locally, you may load it here:
+       <script defer src="ffmpeg.min.js"></script>
+       Otherwise, app.js loads the UMD from CDN with a fallback. -->
+</head>
+<body>
+  <header class="container">
+    <h1>🎙️ VoiceOver App</h1>
+    <p class="muted">Paste text → pick voice → speak → <strong>download audio (WebM/MP3)</strong> — no mic needed.</p>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>1 Text to Speech</h2>
+
+      <label for="text">Text</label>
+      <textarea id="text" placeholder="Paste your script here..." rows="6"></textarea>
+
+      <div class="grid">
+        <div class="field">
+          <label for="langFilter">Filter voices by language (ex: en, si-LK, ta, ko)</label>
+          <input id="langFilter" placeholder="e.g. en, si-LK, ta-IN, ko-KR" />
+        </div>
+
+        <div class="field">
+          <label for="voiceSelect">Voice</label>
+          <select id="voiceSelect"></select>
+        </div>
+      </div>
+
+      <div class="grid sliders">
+        <div class="field">
+          <label for="rate">Rate: <span id="rateVal">1.0</span></label>
+          <input id="rate" type="range" min="0.5" max="2" step="0.1" value="1.0" />
+        </div>
+        <div class="field">
+          <label for="pitch">Pitch: <span id="pitchVal">1.0</span></label>
+          <input id="pitch" type="range" min="0" max="2" step="0.1" value="1.0" />
+        </div>
+        <div class="field">
+          <label for="volume">Volume: <span id="volumeVal">1.0</span></label>
+          <input id="volume" type="range" min="0" max="1" step="0.1" value="1.0" />
+        </div>
+      </div>
+
+      <div class="row">
+        <button id="btnSpeak" class="primary">▶ Speak</button>
+        <button id="btnPause" class="ghost">⏸ Pause</button>
+        <button id="btnResume" class="ghost">⏯ Resume</button>
+        <button id="btnStop" class="danger">■ Stop</button>
+      </div>
+
+      <p id="speakStatus" class="muted">Ready.</p>
+    </section>
+
+    <section class="card">
+      <h2>2) Record the Tab Audio (no mic)</h2>
+      <p class="muted">When asked, choose <strong>This Tab</strong> and tick <strong>Share tab audio</strong>. We record <em>only</em> the voice from this page, not your microphone.</p>
+
+      <div class="row">
+        <label class="switch">
+          <input type="checkbox" id="autoRecord" checked />
+          <span>Auto-record while speaking</span>
+        </label>
+      </div>
+
+      <div class="row">
+        <button id="btnStartRec" class="secondary">● Start Recording (tab audio)</button>
+        <button id="btnStopRec" class="danger" disabled>■ Stop</button>
+        <button id="btnDownloadWebM" class="ghost" disabled>⬇ Download Audio (WebM)</button>
+        <button id="btnConvertMp3" class="ghost" disabled>♫ Convert to MP3</button>
+      </div>
+
+      <p id="recStatus" class="muted">Not recording.</p>
+      <div id="downloads" class="downloads"></div>
+      <!-- Diagnostics block will appear under here -->
+    </section>
+  </main>
+
+  <footer class="container muted small">
+    <p>Notes: Voices come from your OS/Browser (Web Speech API). MP3 conversion uses FFmpeg-WASM locally in your browser.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
