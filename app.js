@@ -379,18 +379,18 @@ btnStopRec.addEventListener('click', () => { stopRecording(); updateDiag(); });
 btnDownloadWebM.addEventListener('click', downloadWebM);
 btnConvertMp3.addEventListener('click', convertToMp3);
 
-// --- Diagnostics updater ---
-function updateDiag() {
-  const kb = lastAudioBlob ? Math.round(lastAudioBlob.size/1024) : 0;
-  const flags = [
-    `servedOverHTTP: ${location.protocol !== 'file:'}`,
-    `captureLive: ${!!(captureStream && captureStream.getTracks().some(t => t.readyState === 'live'))}`,
-    `recording: ${recording}`,
-    `chunks: ${recordedChunks.length}`,
-    `lastBlobKB: ${kb}`,
-    `ffmpegStatus: ${ffmpegStatus}`,
-    `mp3BtnDisabled: ${btnConvertMp3.disabled}`,
-  ];
-  setDiag(flags);
-}
-updateDiag();
+// // --- Diagnostics updater ---
+// function updateDiag() {
+//   const kb = lastAudioBlob ? Math.round(lastAudioBlob.size/1024) : 0;
+//   const flags = [
+//     `servedOverHTTP: ${location.protocol !== 'file:'}`,
+//     `captureLive: ${!!(captureStream && captureStream.getTracks().some(t => t.readyState === 'live'))}`,
+//     `recording: ${recording}`,
+//     `chunks: ${recordedChunks.length}`,
+//     `lastBlobKB: ${kb}`,
+//     `ffmpegStatus: ${ffmpegStatus}`,
+//     `mp3BtnDisabled: ${btnConvertMp3.disabled}`,
+//   ];
+//   setDiag(flags);
+// }
+// updateDiag();

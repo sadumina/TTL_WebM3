@@ -1,11 +1,11 @@
-// server.js — CORS proxy for LibreTranslate with API key injection (Node 18+)
+// server.js — LibreTranslate Proxy (CommonJS, Node.js v22+)
 
-import { createServer } from "http";
-import { URL } from "url";
+const http = require("http");
+const { URL } = require("url");
 
 const PORT = process.env.PORT || 8787;
 const UPSTREAM = process.env.UPSTREAM_URL || "https://libretranslate.com/translate";
-const LIBRE_KEY = process.env.LIBRE_KEY || ""; // set in terminal, not in code
+const LIBRE_KEY = process.env.LIBRE_KEY || ""; // optional
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -19,11 +19,14 @@ function send(res, status, body, extra = {}) {
   res.end(typeof body === "string" ? body : JSON.stringify(body));
 }
 
-const server = createServer(async (req, res) => {
+const server = http.createServer(async (req, res) => {
   if (req.method === "GET" && req.url === "/health") {
     return send(res, 200, { ok: true, upstream: UPSTREAM, key: !!LIBRE_KEY });
   }
-  if (req.method === "OPTIONS") { res.writeHead(204, CORS); return res.end(); }
+  if (req.method === "OPTIONS") {
+    res.writeHead(204, CORS);
+    return res.end();
+  }
 
   const url = new URL(req.url, `http://${req.headers.host}`);
   if (req.method !== "POST" || url.pathname !== "/translate") {
@@ -33,9 +36,19 @@ const server = createServer(async (req, res) => {
   let raw = "";
   req.on("data", (c) => (raw += c));
   req.on("end", async () => {
+    console.log("📩 Raw body:", raw);
+
     let payload = {};
-    try { payload = raw ? JSON.parse(raw) : {}; }
-    catch (e) { return send(res, 400, { error: "Invalid JSON", detail: String(e) }); }
+    try {
+      payload = raw ? JSON.parse(raw) : {};
+    } catch (e) {
+      console.error("❌ Invalid JSON:", e.message);
+      return send(res, 400, { error: "Invalid JSON", detail: String(e) });
+    }
+
+    if (!payload.q) {
+      return send(res, 400, { error: "Missing 'q' field in request" });
+    }
 
     if (!payload.api_key && LIBRE_KEY) payload.api_key = LIBRE_KEY;
 
@@ -46,13 +59,15 @@ const server = createServer(async (req, res) => {
         body: JSON.stringify(payload),
       });
       const text = await upstreamRes.text();
+      console.log("✅ Upstream response:", text);
       return send(res, upstreamRes.status, text);
     } catch (e) {
+      console.error("❌ Upstream error:", e.message);
       return send(res, 502, { error: "Upstream failed", detail: String(e) });
     }
   });
 });
 
 server.listen(PORT, () => {
-  console.log(`Proxy on http://localhost:${PORT}/translate → ${UPSTREAM}`);
+  console.log(`🚀 Proxy running at http://localhost:${PORT}/translate → ${UPSTREAM}`);
 });
